@@ -1,11 +1,6 @@
 #include "vmthook.hpp"
 #include <cstring> // std::memcpy
-#include <sys/mman.h> // mprotect
-
-static void SetWriteable(void* addr, size_t len, int* oldProt) {
-    mprotect(addr, len, PROT_READ | PROT_WRITE | PROT_EXEC);
-    *oldProt = PROT_READ | PROT_EXEC;
-}
+#include <mem/vmem.hpp>
 
 void VmtHook::Hook(void* Instance, bool AllInstances)
 {
@@ -39,10 +34,13 @@ void VmtHook::Unhook()
 
 	if (m_all)
 	{
-		int oldflags;
-        SetWriteable(m_newvmt, size, &oldflags);
+		Vmem::NativeProtectFlags old_flags;
+		Vmem::NativeProtectFlags new_flags = Vmem::ToNativeFlags(
+			Vmem::PROTECTFLAG_READ | Vmem::PROTECTFLAG_WRITE | Vmem::PROTECTFLAG_EXEC
+		);
+        Vmem::SetProtection(m_newvmt, size, new_flags, &old_flags);
 		std::memcpy(m_newvmt, m_oldvmt, size);
-        mprotect(m_newvmt, size, oldflags);
+        Vmem::SetProtection(m_newvmt, size, old_flags, nullptr);
 		delete[] m_oldvmt;
 	}
 	else
@@ -60,10 +58,14 @@ void VmtHook::Set(size_t Index, void* Function)
 	if (m_all)
 	{
 		size_t size = sizeof(m_newvmt[Index]);
-		int oldflags;
-		SetWriteable(&m_newvmt[Index], size, &oldflags);
+		
+		Vmem::NativeProtectFlags old_flags;
+		Vmem::NativeProtectFlags new_flags = Vmem::ToNativeFlags(
+			Vmem::PROTECTFLAG_READ | Vmem::PROTECTFLAG_WRITE | Vmem::PROTECTFLAG_EXEC
+		);
+        Vmem::SetProtection(m_newvmt, size, new_flags, &old_flags);
 		m_newvmt[Index] = Function;
-		mprotect(&m_newvmt[Index], size, oldflags);
+        Vmem::SetProtection(m_newvmt, size, old_flags, nullptr);
 	}
 	else
 		m_newvmt[Index] = Function;
