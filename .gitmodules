@@ -1,0 +1,3 @@
+[submodule "deps/prop"]
+	path = deps/prop
+	url = https://github.com/cademtz/advancedfx-prop-linux
