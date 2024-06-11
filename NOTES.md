@@ -1,7 +1,7 @@
 Various structures and interface function indices
 
 - Game dir: `home/user/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive`
-- Game binary: `bin/linuxsteamrt64/cs2`
+- Game binary: `game/bin/linuxsteamrt64/cs2`
 
 iface HostStateMgr
 ------------------
@@ -39,10 +39,10 @@ iface CMovieRecorder
 		) // This is called by StartMovie. Default bitrate is 45.
 	1. void StartMovieCmd(CCommand* cmd) // Called using a startmovie command invocation
 	2. void EndMovie()
-	3.
-	4.
-	5.
-	6. CaptureFrame() // It's a no-op unless recording has been started.
+	3. bool IsMovieNameSet() // This can indicate whether a recording is active
+	4. int GetTotalNumFrames() // Number of frames recorded so far
+	5. float GetFramerate()
+	6. void CaptureFrame() // It's a no-op unless recording has been started.
 		// Call stack:
 		// GameLoop
 		// -> CLoopTypeClientServer::DoFrameIdk
@@ -50,6 +50,34 @@ iface CMovieRecorder
 		// -> DispatchAsyncEvents // A bogus name given by me
 		// -> RenderService::OnClientInput
 		// -> CMovieRender::CaptureFrame
+
+Members:
+```
+00000128 movie_name      dq ?                    ; CUtlString
+00000130 total_num_frames dd ?
+00000134 record_flags    dw ?                    ; enum RecordFlag
+00000136 field_136       db ?
+00000137 field_137       db ?
+00000138 encode_quality  dd ?
+0000013C encode_fps      dd ?
+00000140 encode_mbps     dd ?
+```
+
+iface CScreenshotService
+------------------------
+There seem to be two vtables.
+One has many functions that don't do much.
+The other has the following:
+	1. TGAWriter(
+			unsigned int width, int height, unsigned int bytesPerPixel, void *pixels, int unknown, KeyValues *optionsKv
+		)
+		// Options:
+		// - asyncwrite: 1|0
+		// - p4edit: 1|0
+		// - filename
+		// pixels: An array of RGBA bytes
+	2. JPGWriter
+	3. PNGWriter
 
 enum Video flags
 ----------------
