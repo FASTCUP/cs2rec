@@ -8,14 +8,16 @@
 #include <afx/WrpConsole.h>
 #include <cstdio>
 
+using Interfaces::Msg;
+
 static const int INDEX_FRAME_STAGE_NOTIFY = 36;
 
 CON_COMMAND(sf_record, "Record stuff") {
-    printf("Args object: %p\n", args);
-    printf("argc: %d\n", args->ArgC());
-    printf("argv[0]: %s\n", args->ArgV(0));
+    Msg("Args object: %p\n", args);
+    Msg("argc: %d\n", args->ArgC());
+    Msg("argv[0]: %s\n", args->ArgV(0));
     if (args->ArgC() >= 2) {
-        printf("argv[1]: %s\n", args->ArgV(1));
+        Msg("argv[1]: %s\n", args->ArgV(1));
     }
 }
 

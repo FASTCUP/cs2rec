@@ -19,10 +19,7 @@ using namespace SOURCESDK;
 namespace Log = Util::Log;
 
 static void InitHook() {
-    Log::Write("InitHook\n");
     Interfaces::Create();
-
-    Log::Write("g_client_hook.Hook()\n");
     g_client_hook.Hook();
 }
 
