@@ -6,3 +6,4 @@ target_sources(recorder PRIVATE
 add_subdirectory(util)
 add_subdirectory(hook)
 add_subdirectory(afx)
+add_subdirectory(mem)
