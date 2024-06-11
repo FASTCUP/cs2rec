@@ -22,20 +22,19 @@ CON_COMMAND(sf_record, "Record stuff") {
 }
 
 void ClientHook::Hook() {
-    m_vmt.Hook(Interfaces::engineToClient);
+    m_vmt.Hook(Interfaces::client);
     m_vmt.Set(INDEX_FRAME_STAGE_NOTIFY, (void*)Hooked_FrameStageNotify);
 }
 
 void ClientHook::FrameStageNotify(ClientFrameStage_t stage) {
     auto o = m_vmt.Get<decltype(Hooked_FrameStageNotify)*>(INDEX_FRAME_STAGE_NOTIFY);
-    o(Interfaces::engineToClient, stage);
+    o(Interfaces::client, stage);
 }
 
 void ClientHook::Hooked_FrameStageNotify(void* this_, ClientFrameStage_t stage) {
     static bool init = false;
     if (stage == ClientFrameStage_t::FRAME_START && !init) {
         init = true;
-        Util::Log::Write("Initializing commands");
         WrpRegisterCommands();
     }
 
