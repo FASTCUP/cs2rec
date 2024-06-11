@@ -4,6 +4,7 @@
 #include <util/library.hpp>
 #include <util/text.hpp>
 #include <prop/cs2/Source2Client.h>
+#include <cstdlib> // std::exit
 
 namespace Log = Util::Log;
 
@@ -23,9 +24,18 @@ namespace Interfaces {
         auto tier0_factory = Util::FindSymbol<CreateInterfaceFn>(ModuleName::Tier0, "CreateInterface").GetOrAbort();
 
         client = (ISource2Client*)client_factory(SOURCESDK_CS2_Source2Client_VERSION, nullptr);
+        AssertPointer(client, SOURCESDK_CS2_Source2Client_VERSION);
+
         engine_to_client = (RealISource2EngineToClient*)engine_factory(SOURCESDK_CS2_ENGINE_TO_CLIENT_INTERFACE_VERSION, nullptr);
+        AssertPointer(engine_to_client, SOURCESDK_CS2_ENGINE_TO_CLIENT_INTERFACE_VERSION);
+
         cvar = (ICvar*)tier0_factory(SOURCESDK_CS2_CVAR_INTERFACE_VERSION, nullptr);
+        AssertPointer(cvar, SOURCESDK_CS2_CVAR_INTERFACE_VERSION);
+
         movie_recorder = (CMovieRecorder*)engine_to_client->GetMovieRecorder();
+        AssertPointer(movie_recorder, "IMovieRecorder");
+
+        
 
         // NOTE(Cade): This is redundant to avoid patching AdvancedFX code
         g_pCVar = cvar;
@@ -37,6 +47,13 @@ namespace Interfaces {
         g_pCVar = nullptr;
         Msg = nullptr;
         Warning = nullptr;
+    }
+
+    void AssertPointer(void* ptr, const char* name) {
+        if (ptr == nullptr) {
+            Log::Write(Util::Sprintf("%p is missing (nullptr)\n", ptr));
+            std::exit(-1);
+        }
     }
 
 }

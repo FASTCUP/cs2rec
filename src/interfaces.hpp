@@ -6,13 +6,17 @@
 #include <prop/cs2/sdk_src/public/cdll_int.h>
 #include <prop/cs2/sdk_src/public/icvar.h>
 
+constexpr const char* SCREENSHOT_SERVICE_VERSION = "ScreenshotService001";
+
 class CMovieRecorder;
 class RealISource2EngineToClient;
+class KeyValues;
 typedef uint32_t LoggerHandle;
 
 namespace Interfaces {
     void Create();
     void Destroy();
+    void AssertPointer(void* ptr, const char* name);
 
     using namespace SOURCESDK::CS2;
     // NOTE(Cade): advancedfx mistakenly named this after a similar but unrelated interface.
@@ -48,10 +52,26 @@ class CMovieRecorder {
     virtual bool IsRecording() = 0;
     virtual int GetTotalNumFrames() = 0;
     virtual float GetFramerate() = 0;
-    virtual void CaptureFrame() = 0;
+    virtual void CaptureFrame() = 0; ///< Will queue the current frame to be output during FrameBoundary()
     virtual void* CaptureSoundIdk(void* unk0, float framerate) = 0;
     virtual void PrintConsoleHelp(LoggerHandle log) = 0;
     virtual uint16_t GetEncodeFlags() = 0; ///<  A combation of @ref EncodeFlags
+};
+
+class IScreenshotService {
+    /**
+     * @param unused This value really is unused
+     * @param options
+     *   - asyncwrite:  1|0
+     *   - p4edit:      1|0
+     *   - filename:    <string>
+     */
+    virtual void TGAWriter(
+        unsigned int width, int height, unsigned int bytesPerPixel, void *pixels,
+        int unused, KeyValues *optionsKv
+    ) = 0;
+    virtual void JPGWriter() = 0;
+    virtual void PNGWriter() = 0;
 };
 
 // NOTE(Cade): This name is temporary until issues are resolved in advancedfx
