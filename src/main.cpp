@@ -8,6 +8,7 @@
 
 // Hooks
 #include "hook/clienthook.hpp"
+#include "hook/moviehook.hpp"
 
 // SDK
 #include "interfaces.hpp"
@@ -21,6 +22,7 @@ namespace Log = Util::Log;
 static void InitHook() {
     Interfaces::Create();
     g_client_hook.Hook();
+    g_movie_hook.Hook();
 }
 
 int __attribute__((constructor)) Main() {
