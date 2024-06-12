@@ -51,8 +51,8 @@ namespace Interfaces {
 
     void AssertPointer(void* ptr, const char* name) {
         if (ptr == nullptr) {
-            Log::Write(Util::Sprintf("%p is missing (nullptr)\n", ptr));
-            std::exit(-1);
+            Log::Write(Util::Sprintf("Missing %s (nullptr)\n", name));
+            std::abort();
         }
     }
 
