@@ -5,24 +5,15 @@
 #include "util/library.hpp"
 #include "util/log.hpp"
 #include "util/text.hpp"
-
-// Hooks
-#include "hook/clienthook.hpp"
-#include "hook/moviehook.hpp"
-
-// SDK
 #include "interfaces.hpp"
-#include <prop/AfxHookSource/SourceInterfaces.h>
-#include <prop/AfxHookSource/SourceSdkShared.h>
-#include <prop/cs2/Source2Client.h>
+#include "hook/allhooks.hpp"
 
 using namespace SOURCESDK;
 namespace Log = Util::Log;
 
 static void InitHook() {
     Interfaces::Create();
-    g_client_hook.Hook();
-    g_movie_hook.Hook();
+    AttachAllHooks();
 }
 
 int __attribute__((constructor)) Main() {

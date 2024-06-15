@@ -21,6 +21,21 @@ CON_COMMAND(sf_record, "Record stuff") {
     }
 }
 
+#if SF_DEBUG
+
+    #include "allhooks.hpp"
+    CON_COMMAND(sf_debug, "Resume execution") {
+        //#if defined(__GNUC__)
+        //    __builtin_trap();
+        //#elif defined(_MSC_VER)
+        //    __debugbreak();
+        //#endif
+        Util::Log::Write("AttachDeferredHooks\n");
+        _AttachDeferredHooks();
+    }
+
+#endif
+
 void ClientHook::Hook() {
     m_vmt.Hook(Interfaces::client);
     m_vmt.Set(INDEX_FRAME_STAGE_NOTIFY, (void*)Hooked_FrameStageNotify);

@@ -28,9 +28,7 @@ void MovieHook::Hook() {
     void* tgawriter = (void*)engine.FindPattern(SIG_TGAWRITER).GetPtr();
     Interfaces::AssertPointer(tgawriter, "CScreenshotService::TGAWriter");
 
-    Util::Log::Write("Hooking TGAWriter...\n");
     m_tgawriter_jmp.Hook(tgawriter, (void*)Hooked_TGAWriter);
-    Util::Log::Write(" TGAWriter...\n");
 }
 
 int MovieHook::Hooked_TGAWriter(
