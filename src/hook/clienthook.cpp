@@ -12,15 +12,6 @@ using Interfaces::Msg;
 
 static const int INDEX_FRAME_STAGE_NOTIFY = 36;
 
-CON_COMMAND(sf_record, "Record stuff") {
-    Msg("Args object: %p\n", args);
-    Msg("argc: %d\n", args->ArgC());
-    Msg("argv[0]: %s\n", args->ArgV(0));
-    if (args->ArgC() >= 2) {
-        Msg("argv[1]: %s\n", args->ArgV(1));
-    }
-}
-
 #if SF_DEBUG
 
     #include "allhooks.hpp"

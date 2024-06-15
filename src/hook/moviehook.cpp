@@ -4,6 +4,8 @@
 #include <interfaces.hpp>
 #include <util/text.hpp>
 #include <util/log.hpp>
+#include <util/ffmpipe.hpp>
+#include <afx/WrpConsole.h>
 
 /*
  * NOTE(Cade):
@@ -22,6 +24,29 @@
 
 using namespace DynLibUtils;
 
+static ffmpipe::PipePtr ffmpeg = nullptr;
+
+CON_COMMAND(sf_record, "Begin recording stuff") {
+    ffmpipe::PipeStatus status;
+    ffmpeg = ffmpipe::Pipe::Create("ffmpeg",
+        L"-y -loglevel warning -c:v rawvideo -f rawvideo "
+        L"-pix_fmt rgb0 -s:v 1920x1080 -framerate 60 -i - test.mp4",
+        10'000, &status
+    );
+
+    if (ffmpeg == nullptr) {
+        Util::Log::Write(Util::Sprintf("FFmpipe status: %s\n", status.ToString().c_str()));
+        return;
+    }
+}
+
+CON_COMMAND(sf_stoprecord, "Stop recording stuff") {
+    if (ffmpeg != nullptr) {
+        ffmpeg->Close();
+        ffmpeg = nullptr;
+    }
+}
+
 void MovieHook::Hook() {
     CModule engine;
     engine.InitFromName(ModuleName::Engine, true);
@@ -36,9 +61,17 @@ int MovieHook::Hooked_TGAWriter(
     int width, int height, unsigned int bytesPerPixel, void *pixels,
     int unused, KeyValues *optionsKv
 ) {
-    Util::Log::Write(Util::Sprintf("Hooked_TGAWriter(%p, %d, %d, %u, %p, %d, %p)\n",
-        this_, width, height, bytesPerPixel, pixels, unused, optionsKv
-    ));
+    //Util::Log::Write(Util::Sprintf("Hooked_TGAWriter(%p, %d, %d, %u, %p, %d, %p)\n",
+    //    this_, width, height, bytesPerPixel, pixels, unused, optionsKv
+    //));
+
+    if (ffmpeg == nullptr)
+        return 0;
+    
+    auto status = ffmpeg->Write(pixels, (size_t)width * (size_t)height * (size_t)bytesPerPixel);
+    if (!status.IsOk()) {
+        Util::Log::Write(Util::Sprintf("FFmpipe status: %s\n", status.ToString().c_str()));
+    }
 
     //using FunctionType = decltype(Hooked_TGAWriter)*;
     //FunctionType o = (FunctionType)g_movie_hook.m_tgawriter_jmp.GetOriginal();
