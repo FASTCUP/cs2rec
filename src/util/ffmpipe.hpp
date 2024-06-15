@@ -77,7 +77,7 @@ namespace ffmpipe {
 
         Pipe(Pipe&&) = delete;
         Pipe(const Pipe&) = delete;
-        ~Pipe() { fclose(m_stdin_w); }
+        ~Pipe() { if (m_stdin_w != nullptr) std::fclose(m_stdin_w); }
 
     private:
         Pipe(FILE* stdin_w) : m_stdin_w(stdin_w) {}
