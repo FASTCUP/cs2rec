@@ -18,11 +18,11 @@ First, Linux users need the command server. In the build folder, run:
 > *This local server will receive and execute commands sent by cs2rec.*
 > *It will primarily spawn background FFmpeg processes.*
 
-Next, inject or load `cs2rec` (`libcs2rec` on Linux) into the game.
+Next, inject or load `cs2rec` (`libcs2rec.so` on Linux) into the game.
 For Linux, I use https://github.com/kubo/injector.
 Build in the source folder with `make`, then run:
 ```sh
-cmd/injector -n cs2 path-to-libcs2rec
+cmd/injector -n cs2 path-to-libcs2rec.so
 ```
 
 Finally, use the in-game console commands
