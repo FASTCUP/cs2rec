@@ -23,6 +23,9 @@ public:
 
 	/// <summary> returns the i-th argument, where 0 is being the first one </summary>
 	virtual char const * ArgV(int i) = 0;
+
+	/// All args including the command's name
+	virtual const char* AllArgs() = 0;
 };
 
 typedef void (*CommandCallback_t)(ICommandArgs* args);

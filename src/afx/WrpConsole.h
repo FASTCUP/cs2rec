@@ -42,6 +42,11 @@ private:
 		{
 			return m_Command.Arg(i);
 		}
+
+		/// All args including the command's name
+		const char* AllArgs() override {
+			return m_Command.GetCommandString();
+		}
 	private:
 		const SOURCESDK::CS2::CCommand & m_Command;
 	};
