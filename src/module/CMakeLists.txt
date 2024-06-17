@@ -1,1 +1,1 @@
-target_sources(recorder PRIVATE recorder.cpp)
+target_sources(cs2rec PRIVATE recorder.cpp)

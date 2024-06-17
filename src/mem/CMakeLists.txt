@@ -1,4 +1,4 @@
-target_sources(recorder PRIVATE
+target_sources(cs2rec PRIVATE
     module.cpp
     vmem.cpp
 )
