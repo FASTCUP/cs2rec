@@ -1,9 +1,17 @@
+/*
+The following source code is a Linux port of ffmpipe.
+Source: https://github.com/cademtz/ffmpipe
+
+This may (and should) be merged into the ffmpipe repo in the future.
+*/
+
 #pragma once
 #include <cstdio>
 #include <cstdint>
 #include <memory>
 #include <filesystem>
 #include <string_view>
+#include "localsocket.hpp"
 
 namespace ffmpipe {
     struct PipeStatus
@@ -52,23 +60,28 @@ namespace ffmpipe {
          * This takes 720x1280 RGB frames as input. `-i -` is required to read from stdin. `-y` allows overwriting files.
          *
          * @param ffmpeg_path Path of the FFmpeg executable.
-         * @param ffmpeg_args Arguments to pass to FFmpeg.
+         * @param output_path Given to FFmpeg as the output path
+         * @param input_args Given to FFmpeg before (and excluding) the input flag
+         * @param output_args Give to FFmpeg after (and excluding) the input flag
          * @param timeout_ms Timeout in milliseconds for reading and writing.
          * @param status Pointer to optional status code.
          * @return `nullptr` on failure.
          */
         static PipePtr Create(
-            const std::filesystem::path& ffmpeg_path, std::wstring_view ffmpeg_args,
+            const std::filesystem::path& ffmpeg_path,
+            const std::filesystem::path& output_path,
+            std::string_view input_args,
+            std::string_view output_args,
             uint32_t timeout_ms = 10'000,
             PipeStatus* status = nullptr
         );
 
-        /// @brief Write all data to stdin. Blocking.
+        /// @brief Write all data to pipe. Blocking.
         /// @return `false` on failure.
         PipeStatus Write(const void* data, size_t length);
 
         /**
-         * @brief Close the stdin handle and wait for program exit. Blocking.
+         * @brief Close the pipe and wait for program exit. Blocking.
          * @details Don't call during write operations.
          * @param timeout_ms Timeout in milliseconds.
          * @param terminate If true, the child process is terminated after timeout.
@@ -77,11 +90,11 @@ namespace ffmpipe {
 
         Pipe(Pipe&&) = delete;
         Pipe(const Pipe&) = delete;
-        ~Pipe() { if (m_stdin_w != nullptr) std::fclose(m_stdin_w); }
+        ~Pipe() { Close(); }
 
     private:
-        Pipe(FILE* stdin_w) : m_stdin_w(stdin_w) {}
+        Pipe() {}
 
-        FILE* m_stdin_w; ///< Write to child process STDIN
+        LocalSocket m_socket; ///< Streams data to FFmpeg
     };
 }

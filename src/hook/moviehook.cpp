@@ -28,10 +28,14 @@ static ffmpipe::PipePtr ffmpeg = nullptr;
 
 CON_COMMAND(sf_record, "Begin recording stuff") {
     ffmpipe::PipeStatus status;
-    ffmpeg = ffmpipe::Pipe::Create("ffmpeg",
-        L"-y -loglevel warning -c:v rawvideo -f rawvideo "
-        L"-pix_fmt rgb0 -s:v 1920x1080 -framerate 60 -i - test.mp4",
-        10'000, &status
+    ffmpeg = ffmpipe::Pipe::Create(
+        "ffmpeg",   // Executable
+        "test.mp4", // Output
+        // Input args
+        "-y -loglevel warning -c:v rawvideo -f rawvideo -pix_fmt rgb0 -s:v 1920x1080 -framerate 60",
+        "",         // Output args
+        10'000,     // Write timeout
+        &status     // Creation status
     );
 
     if (ffmpeg == nullptr) {
@@ -58,17 +62,20 @@ void MovieHook::Hook() {
 
 int MovieHook::Hooked_TGAWriter(
     void* this_,
-    int width, int height, unsigned int bytesPerPixel, void *pixels,
-    int unused, KeyValues *optionsKv
+    int width, int height, unsigned int unk0, void *pixels,
+    int frame_buffer_size, KeyValues *optionsKv
 ) {
-    //Util::Log::Write(Util::Sprintf("Hooked_TGAWriter(%p, %d, %d, %u, %p, %d, %p)\n",
-    //    this_, width, height, bytesPerPixel, pixels, unused, optionsKv
-    //));
+    // NOTE(Cade): bytesPerPixel was 0.
+    //             Perhaps it's an enum for pixel formats instead.
+    //             We can deduce it instead from `frame_buffer_size / width / height`.
+    Util::Log::Write(Util::Sprintf("Hooked_TGAWriter(%p, %d, %d, %u, %p, %d, %p)\n",
+        this_, width, height, unk0, pixels, frame_buffer_size, optionsKv
+    ));
 
     if (ffmpeg == nullptr)
         return 0;
     
-    auto status = ffmpeg->Write(pixels, (size_t)width * (size_t)height * (size_t)bytesPerPixel);
+    auto status = ffmpeg->Write(pixels, (size_t)width * (size_t)height * 4);
     if (!status.IsOk()) {
         Util::Log::Write(Util::Sprintf("FFmpipe status: %s\n", status.ToString().c_str()));
     }
