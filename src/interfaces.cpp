@@ -5,6 +5,7 @@
 #include <util/text.hpp>
 #include <prop/cs2/Source2Client.h>
 #include <cstdlib> // std::exit
+#include <thread> // std::this_thread::sleep
 
 namespace Log = Util::Log;
 
@@ -15,6 +16,13 @@ namespace SOURCESDK::CS2 {
 namespace Interfaces {
 
     void Create() {
+        // Wait for all the modules to load before starting.
+        // NOTE(Cade): In Source 1, the client module is loaded last.
+        //             But I'm not sure about Source 2.
+        while (!Util::IsModuleLoaded(ModuleName::Client)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+        }
+
         Msg = Util::FindSymbol<Tier0MsgFn>(ModuleName::Tier0, "Msg").GetOrAbort();
         Warning = Util::FindSymbol<Tier0MsgFn>(ModuleName::Tier0, "Warning").GetOrAbort();
         Msg("[Cs2Rec] Creating interfaces...\n");

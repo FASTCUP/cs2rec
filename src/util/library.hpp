@@ -18,5 +18,10 @@ namespace Util {
 
         return {(T)sym};
     }
+
+    static inline bool IsModuleLoaded(const char* libName) {
+        void* lib = dlopen(libName, RTLD_LAZY | RTLD_NOLOAD | RTLD_LOCAL);
+        return lib != nullptr;
+    }
     
 }
