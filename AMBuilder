@@ -1,0 +1,60 @@
+# vim: set sts=4 ts=8 sw=4 tw=99 et ft=python:
+import os
+
+MMSPlugin.plugin_name = 'cs2rec'
+MMSPlugin.plugin_alias = 'cs2rec'
+
+for sdk_target in MMSPlugin.sdk_targets:
+    sdk = sdk_target.sdk
+    cxx = sdk_target.cxx
+
+    binary = MMSPlugin.HL2Library(builder, cxx, MMSPlugin.plugin_name, sdk)
+    arch = cxx.target.arch
+
+    binary.compiler.cxxincludes += [
+      os.path.join(builder.sourcePath, 'deps'),
+      os.path.join(builder.sourcePath, 'deps', "cdl86"),
+    ]
+
+    binary.sources += [
+        'main.cpp',
+        os.path.join('src', 'main.cpp'),
+        os.path.join('src', 'interfaces.cpp'),
+
+        os.path.join('src', 'util', 'ffmpipe.cpp'),
+        os.path.join('src', 'util', 'localsocket.cpp'),
+        os.path.join('src', 'util', 'log.cpp'),
+
+        os.path.join('src', 'module', 'recorder.cpp'),
+        
+        os.path.join('src', 'mem', 'module.cpp'),
+        os.path.join('src', 'mem', 'vmem.cpp'),
+        
+        os.path.join('src', 'hook', 'clienthook.cpp'),
+        os.path.join('src', 'hook', 'jmphook.cpp'),
+        os.path.join('src', 'hook', 'moviehook.cpp'),
+        os.path.join('src', 'hook', 'vmthook.cpp'),
+        
+        # External deps
+        os.path.join('deps', 'cdl86', 'cdl.c')
+    ]
+
+    binary.custom = [builder.tools.Protoc(protoc = sdk_target.protoc, sources = [
+      os.path.join(sdk['path'], 'common', 'network_connection.proto'),
+      os.path.join(sdk['path'], 'common', 'networkbasetypes.proto'),
+
+      os.path.join(sdk['path'], 'game', 'shared', 'cs', 'cs_gameevents.proto'),
+
+      os.path.join(sdk['path'], 'gcsdk', 'steammessages.proto'),
+      os.path.join(sdk['path'], 'common', 'engine_gcmessages.proto'),
+      os.path.join(sdk['path'], 'gcsdk', 'gcsdk_gcmessages.proto'),
+
+      os.path.join(sdk['path'], 'game', 'shared', 'cstrike15', 'cstrike15_gcmessages.proto'),
+      os.path.join(sdk['path'], 'game', 'shared', 'cstrike15', 'cstrike15_usermessages.proto'),
+      os.path.join(sdk['path'], 'game', 'shared', 'usermessages.proto'),
+    ])]
+
+    print(f'gcsdk: {os.path.join(sdk['path'], 'gcsdk', 'steammessages.proto')}'),
+
+    nodes = builder.Add(binary)
+    MMSPlugin.binaries += [nodes]
