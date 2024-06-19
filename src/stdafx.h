@@ -28,6 +28,7 @@ static void* _aligned_malloc(size_t size, size_t align) {
 }
 
 class CRawAllocator {
+public:
     template <class... T>
     static void* Alloc(T&&...) { return nullptr; }
 
