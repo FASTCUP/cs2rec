@@ -2,11 +2,22 @@ A recorder for Counter-Strike 2. Supports Linux on AMD64.
 
 ## Build
 
+Requirements:
+- Python 3
+- GCC (For Linux users)
+- [ambuild](https://github.com/alliedmodders/ambuild)
+
+Beforehand, ensure all your git submodules are up-to-date:
 ```sh
-mkdir build     # Make build folder
+git submodule update --init --recursive
+```
+
+Then you can proceed to build:
+```sh
+mkdir build # Make build folder
 cd build
-cmake ..        # Configure
-cmake --build . # Compile
+python3 ../configure.py --sdks=cs2
+ambuild .
 ```
 
 ## Usage
