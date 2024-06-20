@@ -5,7 +5,6 @@
 #include <util/text.hpp>
 #include <util/log.hpp>
 #include <util/ffmpipe.hpp>
-#include <afx/WrpConsole.h>
 #include <module/recorder.hpp>
 
 /*

@@ -9,7 +9,6 @@
 //   Most of these functions are "unused"; The templates using them aren't instantiated.
 //   I suspect MSVC didn't link them as a result. But GCC still tries.
 
-#define COMPILE_TIME_ASSERT(x)
 #define MEM_ALLOC_CREDIT_CLASS()
 #define __cdecl
 
@@ -26,12 +25,3 @@ static inline void DebuggerBreak() {}
 static void* _aligned_malloc(size_t size, size_t align) {
     return std::aligned_alloc(align, size);
 }
-
-class CRawAllocator {
-public:
-    template <class... T>
-    static void* Alloc(T&&...) { return nullptr; }
-
-    template <class... T>
-    static void Free(T&&...) { }
-};

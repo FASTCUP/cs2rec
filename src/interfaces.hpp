@@ -1,34 +1,18 @@
 #pragma once
 #include <stdafx.h>
 #include <cstdint>
-#include <prop/AfxHookSource/SourceSdkShared.h>
-#include <prop/AfxHookSource/SourceInterfaces.h>
-#include <prop/cs2/sdk_src/public/cdll_int.h>
-#include <prop/cs2/sdk_src/public/icvar.h>
-
-constexpr const char* SCREENSHOT_SERVICE_VERSION = "ScreenshotService001";
+#include <ISmmPlugin.h>
 
 class CMovieRecorder;
-class RealISource2EngineToClient;
-class KeyValues;
+class ISource2EngineToClient;
 typedef uint32_t LoggerHandle;
 
 namespace Interfaces {
-    void Create();
-    void Destroy();
+    bool Create();
     void AssertPointer(void* ptr, const char* name);
 
-    using namespace SOURCESDK::CS2;
-    // NOTE(Cade): advancedfx mistakenly named this after a similar but unrelated interface.
-    //             This alias will remain until it is fixed upstream in advancedfx.
-    using ISource2Client = SOURCESDK::CS2::ISource2EngineToClient;
-
-    inline ISource2Client* client = nullptr;
-    inline RealISource2EngineToClient* engine_to_client = nullptr;
-    inline ICvar* cvar = nullptr;
+    inline ISource2EngineToClient* engine_to_client = nullptr;
     inline CMovieRecorder* movie_recorder;
-    inline Tier0MsgFn Msg = nullptr;
-    inline Tier0MsgFn Warning = nullptr;
 }
 
 class CMovieRecorder {
@@ -47,7 +31,7 @@ class CMovieRecorder {
         float framerate, int bitrate, int jpeg_quality,
         bool show_codec_prompt, void* unk0, bool unk1_false
     ) = 0;
-    virtual void StartMovieCmd(SOURCESDK::CS2::CCommand* cmd) = 0;
+    virtual void StartMovieCmd(class CCommand* cmd) = 0;
     virtual void EndMovie() = 0;
     virtual bool IsRecording() = 0;
     virtual int GetTotalNumFrames() = 0;
@@ -58,24 +42,7 @@ class CMovieRecorder {
     virtual uint16_t GetEncodeFlags() = 0; ///<  A combation of @ref EncodeFlags
 };
 
-class IScreenshotService {
-    /**
-     * @param unused This value really is unused
-     * @param options
-     *   - asyncwrite:  1|0
-     *   - p4edit:      1|0
-     *   - filename:    <string>
-     */
-    virtual void TGAWriter(
-        unsigned int width, int height, unsigned int bytesPerPixel, void *pixels,
-        int unused, KeyValues *optionsKv
-    ) = 0;
-    virtual void JPGWriter() = 0;
-    virtual void PNGWriter() = 0;
-};
-
-// NOTE(Cade): This name is temporary until issues are resolved in advancedfx
-class RealISource2EngineToClient
+class ISource2EngineToClient
 {
 public:
     virtual void _Unknown_000(void) = 0;

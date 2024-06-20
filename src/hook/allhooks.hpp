@@ -1,11 +1,9 @@
 #pragma once
-#include "clienthook.hpp"
 #include "moviehook.hpp"
 
 static void _AttachDeferredHooks();
 
 static void AttachAllHooks() {
-    g_client_hook.Hook();
 #if !SF_DEBUG
     _AttachDeferredHooks();
 #endif

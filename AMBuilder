@@ -19,9 +19,7 @@ for sdk_target in MMSPlugin.sdk_targets:
 
     binary.sources += [
         os.path.join('src', 'main.cpp'),
-        os.path.join('src', 'metamod.cpp'),
         os.path.join('src', 'interfaces.cpp'),
-        os.path.join('src', 'afx', 'WrpConsole.cpp'),
 
         os.path.join('src', 'util', 'ffmpipe.cpp'),
         os.path.join('src', 'util', 'localsocket.cpp'),
@@ -32,7 +30,6 @@ for sdk_target in MMSPlugin.sdk_targets:
         os.path.join('src', 'mem', 'module.cpp'),
         os.path.join('src', 'mem', 'vmem.cpp'),
         
-        os.path.join('src', 'hook', 'clienthook.cpp'),
         os.path.join('src', 'hook', 'jmphook.cpp'),
         os.path.join('src', 'hook', 'moviehook.cpp'),
         os.path.join('src', 'hook', 'vmthook.cpp'),
