@@ -1,5 +1,6 @@
 #include <ISmmPlugin.h>
 #include "interfaces.hpp"
+#include "hook/allhooks.hpp"
 
 class CS2Rec final : public ISmmPlugin, public IMetamodListener
 {
@@ -36,5 +37,6 @@ bool CS2Rec::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool l
     }
 
     ConVar_Register(FCVAR_RELEASE);
+    AttachAllHooks();
     return true;
 }
