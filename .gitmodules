@@ -1,6 +1,3 @@
-[submodule "deps/prop"]
-	path = deps/prop
-	url = https://github.com/cademtz/advancedfx-prop-linux
 [submodule "deps/cdl86"]
 	path = deps/cdl86
 	url = https://github.com/lunarjournal/cdl86/
