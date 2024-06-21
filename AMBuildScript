@@ -39,15 +39,9 @@ def ResolveEnvPath(env, folder):
   return None
 
 # Resolve path relative to source directory
-# (The location of your build script is located)
+# (Where your build script is located)
 def ResolveSourcePath(path):
   path = os.path.join(builder.sourcePath, path)
-  if not os.path.isdir(path):
-    return None
-  return os.path.abspath(path)
-
-# Resolve a path relative to configuration dir
-def ResolvePath(path):
   if not os.path.isdir(path):
     return None
   return os.path.abspath(path)

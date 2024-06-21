@@ -4,6 +4,13 @@ import os
 MMSPlugin.plugin_name = 'cs2rec'
 MMSPlugin.plugin_alias = 'cs2rec'
 
+builder.cxx = builder.DetectCxx()
+cmdserver = builder.cxx.Program('cmdserver')
+cmdserver.sources += [
+    os.path.join(builder.sourcePath, 'src', 'cmdserver', 'cmdserver.cpp'),
+]
+builder.Add(cmdserver)
+
 for sdk_target in MMSPlugin.sdk_targets:
     sdk = sdk_target.sdk
     cxx = sdk_target.cxx
