@@ -8,7 +8,6 @@ class ISource2EngineToClient;
 typedef uint32_t LoggerHandle;
 
 namespace Interfaces {
-    bool Create();
     void AssertPointer(void* ptr, const char* name);
 
     inline ISource2EngineToClient* engine_to_client = nullptr;

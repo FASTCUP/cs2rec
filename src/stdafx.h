@@ -9,19 +9,3 @@
 //   Most of these functions are "unused"; The templates using them aren't instantiated.
 //   I suspect MSVC didn't link them as a result. But GCC still tries.
 
-#define MEM_ALLOC_CREDIT_CLASS()
-#define __cdecl
-
-static inline bool IsDebug() { return false; }
-
-template <class... T>
-static inline void ReconnectInterface(T&&...) {}
-
-template <class... T>
-static inline void V_swap(T&&...) {}
-
-static inline void DebuggerBreak() {}
-
-static void* _aligned_malloc(size_t size, size_t align) {
-    return std::aligned_alloc(align, size);
-}

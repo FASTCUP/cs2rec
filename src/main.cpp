@@ -1,8 +1,5 @@
 #include <ISmmPlugin.h>
-
-namespace Interfaces {
-    bool Create();
-};
+#include "interfaces.hpp"
 
 class CS2Rec final : public ISmmPlugin, public IMetamodListener
 {
@@ -24,8 +21,20 @@ PLUGIN_EXPOSE(CS2Rec, s_cs2Rec);
 
 bool CS2Rec::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) {
     PLUGIN_SAVEVARS();
-    if (!Interfaces::Create())
+
+    GET_V_IFACE_CURRENT(
+        GetEngineFactory, Interfaces::engine_to_client, ISource2EngineToClient,
+        SOURCE2ENGINETOCLIENT_INTERFACE_VERSION
+    );
+    GET_V_IFACE_CURRENT(GetEngineFactory, g_pCVar, ICvar, CVAR_INTERFACE_VERSION);
+
+    Interfaces::movie_recorder = (CMovieRecorder*)Interfaces::engine_to_client->GetMovieRecorder();
+    if (!Interfaces::movie_recorder) {
+        if (error && maxlen)
+            ismm->Format(error, maxlen, "Could not find interface CMovieRecorder");
         return false;
+    }
+
     ConVar_Register(FCVAR_RELEASE);
     return true;
 }
