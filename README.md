@@ -22,19 +22,19 @@ ambuild .
 
 ## Usage
 
-First, Linux users need the command server. In the build folder, run:
+First, install the mod by copying the addons folder into your game.
+For Linux users, the command may look like this:
 ```sh
-./src/cmdserver/cmdserver
+cp -r addons/ ~/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo
+```
+
+Next, Linux users must host the local command server.
+It is located here in the build folder:
+```sh
+cmdserver/linux-x86_64/cmdserver
 ```
 > *This local server will receive and execute commands sent by cs2rec.*
 > *It will primarily spawn background FFmpeg processes.*
-
-Next, inject or load `cs2rec` (`libcs2rec.so` on Linux) into the game.
-For Linux, I use https://github.com/kubo/injector.
-Build in the source folder with `make`, then run:
-```sh
-cmd/injector -n cs2 path-to-libcs2rec.so
-```
 
 Finally, use the in-game console commands
 Example:
