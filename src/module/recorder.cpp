@@ -53,21 +53,21 @@ void Recorder::StartRecording(const std::filesystem::path& output) {
         Warning("[Recorder] FFmpeg path is empty\n");
         return;
     } else if (IsRecording()) {
-        Warning("[Recorder] Already recording\n");
-        return;
+        Warning("[Recorder] An extra pipe was created\n");
     }
 
     ffmpipe::PipeStatus status;
-    m_pipe = ffmpipe::Pipe::Create(
+    ffmpipe::PipePtr pipe = ffmpipe::Pipe::Create(
         m_ffmpeg_path, output, m_ffmpeg_input_args, m_ffmpeg_output_args,
         10'000, &status
     );
 
-    if (m_pipe == nullptr) {
+    if (pipe == nullptr) {
         Warning("[Recorder] Failed to create pipe: %s\n", status.ToString().c_str());
         return;
     }
 
+    m_pipes.emplace_back(std::move(pipe));
     Msg("[Recorder] Connected to FFmpeg\n");
 }
 
@@ -79,15 +79,18 @@ void Recorder::StopRecording() {
 
     // Manually close the pipe before freeing.
     // Otherwise freeing will forcefully terminate FFmpeg.
-    m_pipe->Close();
-    m_pipe = nullptr;
+    for (ffmpipe::PipePtr pipe : m_pipes)
+        pipe->Close();
+    m_pipes.clear();
 }
 
 void Recorder::OnWriteFrame(void* data, size_t length) {
     if (!IsRecording())
         return;
     
-    ffmpipe::PipeStatus status = m_pipe->Write(data, length);
-    if (!status.IsOk())
-        Warning("[Recorder] pipe->Write error: %s\n", status.ToString().c_str());
+    for (ffmpipe::PipePtr pipe : m_pipes) {
+        ffmpipe::PipeStatus status = pipe->Write(data, length);
+        if (!status.IsOk())
+            Warning("[Recorder] pipe->Write error: %s\n", status.ToString().c_str());
+    }
 }

@@ -2,13 +2,14 @@
 #include <string>
 #include <filesystem>
 #include <util/ffmpipe.hpp>
+#include <vector>
 
 class Recorder {
 public:
     // Start recording with the current arguments
     void StartRecording(const std::filesystem::path& output);
     void StopRecording();
-    inline bool IsRecording() const { return m_pipe != nullptr; }
+    inline bool IsRecording() const { return !m_pipes.empty(); }
 
     /**
      * Call when the game is writing a movie frame.
@@ -24,8 +25,7 @@ public:
     std::string m_ffmpeg_output_args;
 
 private:
-    bool m_is_recording = false;
-    ffmpipe::PipePtr m_pipe;
+    std::vector<ffmpipe::PipePtr> m_pipes;
 };
 
 inline Recorder g_recorder;
