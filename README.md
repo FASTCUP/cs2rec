@@ -25,7 +25,7 @@ ambuild .
 First, install the mod by copying the addons folder into your game.
 For Linux users, the command may look like this:
 ```sh
-cp -r addons/ ~/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo
+cp -r package/addons/ ~/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo
 ```
 
 Next, Linux users must host the local command server.
@@ -39,20 +39,10 @@ cmdserver/linux-x86_64/cmdserver
 Finally, use the in-game console commands
 Example:
 ```
-// This value is "ffmpeg" by default
-sf_ffmpeg_path ffmpeg
-
-// "-y" to overwrite existing files;
-// "-s:v" to set resolution
-sf_ffmpeg_input_args -y -loglevel warning -c:v rawvideo -f rawvideo -pix_fmt rgb0 -s:v 1920x1080 -framerate 60
-
-// This can be blank.
-// "-c:v huffyuv" chooses the lossless HuffYUV encoder
-sf_ffmpeg_output_args -c:v huffyuv
-
-// Start FFmpeg and output to mymovie.avi
-// Relative paths on Linux will be relative to cmdserver.
-sf_ffmpeg_start mymovie.avi
+// The following command spawns FFmpeg in the background.
+// You can run this many times to spawn many processes.
+// The variables {{stdargs}} and {{video_input}} will be expanded.
+sf_ffmpeg_start ffmpeg {{stdargs}} -y -loglevel warning -c:v rawvideo -f rawvideo -pix_fmt rgb0 -s:v 1920x1080 -framerate 60 -i {{video_input}} -c:v huffyuv output.avi
 
 // Start in-game recorder.
 // You MUST include TGA, which is hooked by cs2rec.
@@ -62,21 +52,14 @@ startmovie mymovie tga wav
 // Stop in-game recorder
 endmovie
 
-// Stop FFmpeg to finalize the video output
+// Stop the spawned FFmpeg processes to finalize the video output
 sf_ffmpeg_stop
 ```
 
-You have to set the FFmpeg args each time the game is launched.
-But afterwards you only need to use `sf_ffmpeg_start` and `sf_ffmpeg_stop`.
+That is all.
 
-> In short:
-> - Start FFmpeg
-> - Start in-game recorder (to trigger hooks that write to FFmpeg)
-> - Stop in-game recorder
-> - Stop FFmpeg to finish the video
->
 > FFmpeg must have every detail manually supplied. This includes:
-> - Pixel format (`-pixfmt <fmt>`)
+> - Pixel format (`-pixfmt <fmt>`, commonly `rgb0`)
 > - Resolution (`-s:v <width>x<height>`)
 > - Framerate (`-framerate <fps>`)
 >

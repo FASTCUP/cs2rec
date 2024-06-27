@@ -1,67 +1,45 @@
 #include "recorder.hpp"
 #include <interfaces.hpp>
+#include <util/log.hpp>
+#include <util/text.hpp>
+#include <filesystem>
 
-CON_COMMAND(sf_ffmpeg_path, "Path of the FFmpeg executable") {
-    if (args.ArgC() != 2) {
-        Msg("Usage: sf_ffmpeg_path <path>\n");
-        Msg("[Recorder] FFmpeg path: %s\n", g_recorder.m_ffmpeg_path.string().c_str());
-        return;
-    }
-    g_recorder.m_ffmpeg_path = args.Arg(1);
-}
-CON_COMMAND(sf_ffmpeg_input_args, "FFmpeg input args (before the -i flag)") {
-    if (args.ArgC() <= 1) {
-        Msg("Usage: sf_ffmpeg_input_args ...\n");
-        Msg(
-            "Example args:\n"
-            "-y -loglevel warning -c:v rawvideo -f rawvideo -pix_fmt rgb0 -s:v 1920x1080 "
-            "-framerate 60\n"
-        );
-        Msg("[Recorder] FFmpeg input args: %s\n", g_recorder.m_ffmpeg_input_args.c_str());
-        return;
-    }
-    g_recorder.m_ffmpeg_input_args = args.ArgS();
-}
-CON_COMMAND(sf_ffmpeg_output_args, "FFmpeg output args (after the -i flag, excluding output path)") {
-    if (args.ArgC() <= 1) {
-        Msg("Usage: sf_ffmpeg_output_args ...\n");
-        Msg(
-            "Example args:\n"
-            "-c:v huffyuv\n"
-        );
-        Msg("[Recorder] FFmpeg output args: %s\n", g_recorder.m_ffmpeg_output_args.c_str());
-        return;
-    }
-    g_recorder.m_ffmpeg_output_args = args.ArgS();
-}
 CON_COMMAND(sf_ffmpeg_start, "Start ffmpeg before recording") {
-    if (args.ArgC() != 2) {
-        Msg("Usage: sf_ffmpeg_start <output-file>\n");
+    if (args.ArgC() <= 1) {
+        Msg(
+            "Usage: sf_ffmpeg_start <command>\n"
+            "Spawns a new FFmpeg instance.\n"
+            "`command` will expand valid variables with the \"{{name}}\" syntax.\n"
+            "Variables:\n"
+            "- {{stdargs}}: Required arguments to be included at the start.\n"
+            "- {{video_input}}: The video input. May be a random pipe or socket name.\n"
+            "Example:\n"
+            "  sf_ffmpeg_start ffmpeg {{stdargs}} -y -loglevel warning\n"
+            "    -c:v rawvideo -f rawvideo -pix_fmt rgb0 -s:v 1920x1080 -framerate 60\n"
+            "    -i {{video_input}} -c:v huffyuv output.avi\n"
+            "The input format must be raw. The pixel format is commonly rgb0.\n"
+            "The input framerate, resolution, and format must be provided exactly.\n"
+        );
         return;
     }
-    g_recorder.StartRecording(args.Arg(1));
+    g_recorder.StartRecording(args.ArgS());
 }
 CON_COMMAND(sf_ffmpeg_stop, "Stop ffmpeg after recording") {
     g_recorder.StopRecording();
 }
 
-void Recorder::StartRecording(const std::filesystem::path& output) {
-    if (output.empty()) {
-        Warning("[Recorder] Output path is empty\n");
-        return;
-    } else if (m_ffmpeg_path.empty()) {
-        Warning("[Recorder] FFmpeg path is empty\n");
+static std::filesystem::path FindLatestWav();
+
+void Recorder::StartRecording(std::string_view command) {
+    if (command.empty()) {
+        Warning("[Recorder] Command is empty\n");
         return;
     } else if (IsRecording()) {
-        Warning("[Recorder] An extra pipe was created\n");
+        Warning("[Recorder] Spawning another FFmpeg process\n");
     }
 
     ffmpipe::PipeStatus status;
-    ffmpipe::PipePtr pipe = ffmpipe::Pipe::Create(
-        m_ffmpeg_path, output, m_ffmpeg_input_args, m_ffmpeg_output_args,
-        10'000, &status
-    );
-
+    ffmpipe::PipePtr pipe = ffmpipe::Pipe::Create(command, 10'000, &status);
     if (pipe == nullptr) {
         Warning("[Recorder] Failed to create pipe: %s\n", status.ToString().c_str());
         return;
@@ -81,7 +59,7 @@ void Recorder::StopRecording() {
     // Otherwise freeing will forcefully terminate FFmpeg.
     for (ffmpipe::PipePtr pipe : m_pipes)
         pipe->Close();
-    m_pipes.clear();
+    Cleanup();
 }
 
 void Recorder::OnWriteFrame(void* data, size_t length) {
@@ -89,8 +67,54 @@ void Recorder::OnWriteFrame(void* data, size_t length) {
         return;
     
     for (ffmpipe::PipePtr pipe : m_pipes) {
-        ffmpipe::PipeStatus status = pipe->Write(data, length);
+        ffmpipe::PipeStatus status = pipe->WriteFrame(data, length);
         if (!status.IsOk())
             Warning("[Recorder] pipe->Write error: %s\n", status.ToString().c_str());
     }
+
+    if (m_current_frame == 0) {
+        std::filesystem::path wav_path = FindLatestWav();
+        if (!wav_path.empty()) {
+
+        } else {
+            Warning("[Recorder] Failed to locate wav file\n");
+        }
+    }
+
+    ++m_current_frame;
+}
+
+void Recorder::Cleanup() {
+    m_pipes.clear();
+    m_current_frame = 0;
+}
+
+static std::filesystem::path FindLatestWav() {
+    // Find directory of game/csgo/movie.
+    // CS2 runs in game/bin/linuxsteamrt64/
+    std::filesystem::path path = std::filesystem::current_path();
+    while (!path.empty() && path.stem() != "game") {
+        path = path.parent_path();
+    }
+
+    path = path / "csgo" / "movie";
+
+    // Paths are named yyyy_mm_dd_hh_mm_ss.
+    // Choose the latest path in alphabetical order.
+    std::filesystem::path latest_movie;
+    for (const auto& entry : std::filesystem::directory_iterator{path}) {
+        if (!entry.is_directory())
+            continue;
+        if (latest_movie.empty() || latest_movie > entry.path())
+            latest_movie = entry.path();
+    }
+    
+    //std::filesystem::path wav_path;
+    //if (const auto& entry : std::filesystem::directory_iterator{latest_movie}) {
+    //    if (entry.extension() == ".wav") {
+    //        return entry.path();
+    //    }
+    //}
+
+    return {};
 }

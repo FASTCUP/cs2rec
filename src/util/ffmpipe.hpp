@@ -56,29 +56,30 @@ namespace ffmpipe {
          * FFmpeg will not read from stdin unless you pass the appropriate argument.
          *
          * Example:
-         *   -c:v rawvideo -f rawvideo -pix_fmt rgb24 -s:v 720x1280 -framerate 60 -i - -y output.mp4
+         *   ffmpeg {{stdargs}} -c:v rawvideo -f rawvideo -pix_fmt rgb24 -s:v 720x1280 -framerate 60 -i {{video_input}} -y output.mp4
          * This takes 720x1280 RGB frames as input. `-i -` is required to read from stdin. `-y` allows overwriting files.
          *
-         * @param ffmpeg_path Path of the FFmpeg executable.
-         * @param output_path Given to FFmpeg as the output path
-         * @param input_args Given to FFmpeg before (and excluding) the input flag
-         * @param output_args Give to FFmpeg after (and excluding) the input flag
+         * @param command The ffmpeg command. " &" is appended to run it in the background.
+         * 
+         * Templates use "{{name}}" syntax and are expanded in the commmand string.
+         * - {{stdargs}}: Standard arguments. Use after ffmpeg like "ffmpeg {{stdargs}}".
+         * - {{video_input}}: Video input. May expand to a named socket.
+         * 
+         * Templates are not expanded if the name does not exist.
+         * 
          * @param timeout_ms Timeout in milliseconds for reading and writing.
          * @param status Pointer to optional status code.
          * @return `nullptr` on failure.
          */
         static PipePtr Create(
-            const std::filesystem::path& ffmpeg_path,
-            const std::filesystem::path& output_path,
-            std::string_view input_args,
-            std::string_view output_args,
+            std::string_view command,
             uint32_t timeout_ms = 10'000,
             PipeStatus* status = nullptr
         );
 
         /// @brief Write all data to pipe. Blocking.
         /// @return `false` on failure.
-        PipeStatus Write(const void* data, size_t length);
+        PipeStatus WriteFrame(const void* data, size_t length);
 
         /**
          * @brief Close the pipe and wait for program exit. Blocking.
@@ -95,6 +96,6 @@ namespace ffmpipe {
     private:
         Pipe() {}
 
-        LocalSocket m_socket; ///< Streams data to FFmpeg
+        LocalSocket m_videosocket; ///< Streams data to FFmpeg
     };
 }
