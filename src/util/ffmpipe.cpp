@@ -43,7 +43,6 @@ namespace ffmpipe {
         uint32_t timeout_ms,
         PipeStatus* status
     ) {
-        Util::Log::Write("Pipe::Create\n");
         // Create unique path for FFmpeg socket
         char tmp_path[64];
         std::snprintf(tmp_path, sizeof(tmp_path), "/tmp/cs2rec-%ld-%d", std::time(nullptr), getpid());
@@ -54,9 +53,6 @@ namespace ffmpipe {
 
         std::string cmdline = ExpandTemplate(command, vars);
         cmdline += " &"; // Run command in background
-
-        Util::Log::Write("cmdserver call\n");
-        Util::Log::Write(Util::Sprintf("%s\n", cmdline.c_str()));
 
         // Create FFmpeg process with cmdline.
         // This uses a server to do it, because CS2 does not like being forked.
@@ -73,15 +69,12 @@ namespace ffmpipe {
             }
         }
 
-        Util::Log::Write("Connect pipe\n");
         // Connect to FFmpeg process
         PipePtr pipe {new Pipe};
         if (pipe->m_videosocket.Connect(tmp_path, (timeout_ms + 1) / 50, timeout_ms) == -1) {
             if (status) *status = PipeStatus::Capture(PipeStatus::Type::CREATE_PIPE);
             return nullptr;
         }
-
-        Util::Log::Write("Pipe::Create done\n");
 
         if (status) *status = PipeStatus::Capture(PipeStatus::Type::OK);
         return pipe;
