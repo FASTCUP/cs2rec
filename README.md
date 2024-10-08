@@ -47,7 +47,8 @@ sf_ffmpeg_start ffmpeg {{stdargs}} -y -loglevel warning -c:v rawvideo -f rawvide
 // Start in-game recorder.
 // You MUST include TGA, which is hooked by cs2rec.
 // "wav" will output a separate "mymovie.wav" file in the CS2 movie dir.
-startmovie mymovie tga wav
+// "framerate 60" must match the framerate given to the FFmpeg command.
+startmovie mymovie tga wav framerate 60
 
 // Stop in-game recorder
 endmovie
