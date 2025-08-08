@@ -105,5 +105,6 @@ public:
     virtual void _Unknown_059(void) = 0;
     virtual void _Unknown_060(void) = 0;
     virtual void _Unknown_061(void) = 0;
-    virtual CMovieRecorder* GetMovieRecorder(void) = 0; //:62
+    virtual void _Unknown_062(void) = 0;
+    virtual CMovieRecorder* GetMovieRecorder(void) = 0; //:63
 };

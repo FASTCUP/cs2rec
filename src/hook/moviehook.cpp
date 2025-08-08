@@ -19,7 +19,7 @@
 #if defined(_WIN32)
     constexpr const char* SIG_TGAWRITER = "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 9C 24";
 #elif defined(__linux__)
-    constexpr const char* SIG_TGAWRITER = "55 4D 89 C2 48 89 E5 41 57 41 56";
+    constexpr const char* SIG_TGAWRITER = "55 48 89 E5 41 57 41 56 41 55 41 54 4D 89 C4 53 48 83 EC";
 #endif
 
 using namespace DynLibUtils;
